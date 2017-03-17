@@ -1,2 +1,2 @@
-**Курсовая Работа ИП-615**
+**Курсовая Работа**
 ![alt text](http://codercat.ru/images/favicon.ico)
