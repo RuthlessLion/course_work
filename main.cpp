@@ -1,69 +1,76 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
-#include <string>
+#include <ctime>
+
+using namespace sf;
 
 int main()
 {
-    float posx = 0,posy = 0;
-    sf::Font font;
-    if (!font.loadFromFile("Arial.ttf")){
-        std::cout << "Error load font"<<std::endl;}
-    sf::Text text;
-    text.setFont(font);
-    text.setString("Hello");
-    text.setCharacterSize(24);
-    text.setColor(sf::Color::Red);
-    text.setStyle(sf::Text::Bold);
+    RenderWindow app(VideoMode(720,720), "15-Puzzle!");
+    app.setFramerateLimit(60);
 
+    Texture t;
+    t.loadFromFile("15.png");
 
+    int w = 180;
+    int grid[6][6] = {0};
+    Sprite sprite[17];
 
-
-
-    sf::RenderWindow window(sf::VideoMode(600, 600), "SFML works!");
-    sf::CircleShape m_radius(200);
-    window.setFramerateLimit(60);
-
-
-
-    while (window.isOpen())
-    {
-        sf::Event event;
-        while (window.pollEvent(event))
+    int n=0;
+    for (int i=0;i<4;i++)
+        for (int j=0;j<4;j++)
         {
-            switch(event.type)
-            {
-                case sf::Event::Closed:
-                    window.close();
-                    break;
-                case sf::Event::KeyPressed:
-                    if(event.key.code == sf::Keyboard::Escape)
-                        window.close();
-                    break;
-            }
+            n++;
+            sprite[n].setTexture(t);
+            sprite[n].setTextureRect( IntRect(i*w,j*w,w,w) );
+            grid[i+1][j+1]=n;
+            std::cout<<spriteс<<std::endl;
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)){
-            if (posy > 0){
-                posy--;}
-            std::cout<<"up"<<posy<<std::endl;}
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)){
-            if (posy < 573){
-                posy++;}
-            std::cout<<"up"<<posy<<std::endl;}
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)){
-            if (posx > 0){
-                posx--;}
-            std::cout<<"up"<<posx<<std::endl;}
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)){
-            if (posx < 538){
-                posx++;}
-            std::cout<<"up"<<posx<<std::endl;}
-
-        text.setPosition ( posx , posy ) ;
+    for (int i = 1; i < 15; ++i)
+        std::swap(sprite[i], sprite[std::rand() % 15]);
 
 
-        window.draw(text);
-        window.display();
-        window.clear();
+    while (app.isOpen())
+    {
+        Event e;
+        while (app.pollEvent(e))
+        {
+            if (e.type == Event::Closed)
+                app.close();
+
+            if (e.type == Event::MouseButtonPressed)
+                if (e.key.code == Mouse::Left)
+                {
+                    Vector2i pos = Mouse::getPosition(app);
+                    int x = pos.x/w + 1;
+                    int y = pos.y/w + 1;
+
+                    int dx=0;
+                    int dy=0;
+
+                    if (grid[x+1][y]==16) {dx=1; dy=0;};
+                    if (grid[x][y+1]==16) {dx=0; dy=1;};
+                    if (grid[x][y-1]==16) {dx=0; dy=-1;};
+                    if (grid[x-1][y]==16) {dx=-1;dy=0;};
+
+                    int n = grid[x][y];
+                    grid[x][y] = 16;
+                    grid[x+dx][y+dy] = n;
+
+                }
+
+        }
+
+        app.clear(Color::White);
+        for (int i=0;i<4;i++)
+            for (int j=0;j<4;j++)
+            {
+                int n = grid[i+1][j+1];
+                sprite[n].setPosition(i*w,j*w);
+                app.draw(sprite[n]);
+            }
+        app.display();
+
     }
 
     return 0;
