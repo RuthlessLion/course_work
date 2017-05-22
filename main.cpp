@@ -1,26 +1,47 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <ctime>
+int const WINDOW_W = 720;
+int const WINDOW_H = 720;
 
 using namespace sf;
 
-int main()
-{
-    int day=1;
-    int check=1;
-    int pos[6][6];
-    RenderWindow app(VideoMode(720,720), "15-Puzzle!");
+int main(){
+    RenderWindow app(VideoMode(WINDOW_W,WINDOW_H), "15-Puzzle!", sf::Style::Titlebar | sf::Style::Close);
     app.setFramerateLimit(60);
+//типо main.hpp, ибо он просто не работает
+int n=0; 
+int day=1;
+int check=1;
+int scene=1;
+int pos[6][6];
+int w = 180;
+int grid[6][6] = {0};
+Sprite *image_index;
+Texture *image_texture;
+Sprite sprite[17];
+Texture t;
+Font* font;
+Text* text;
+Text* end_game;
+//конец main.hpp
 
-    Texture t;
-    t.loadFromFile("15.png");
+    t.loadFromFile("resources/15.png");
+    image_texture = new sf::Texture;
+    image_texture->loadFromFile("resources/15_end.png");
 
-    int w = 180;
-    int grid[6][6] = {0};
-    Sprite sprite[17];
+    image_index = new Sprite(*image_texture);
+    image_index->setTexture(*image_texture);
 
-    int n=0;
-    for (int j=0;j<4;j++)
+    font = new sf::Font;
+    font->loadFromFile("resources/SF-Light.otf");
+
+    end_game = new sf::Text(L"You won this game",*font,75);
+    end_game->setPosition(60, 232);
+    end_game->setColor(sf::Color(0, 0, 0));
+
+
+    for (int j=0;j<4;j++){
         for (int i=0;i<4;i++){
 
             n++;
@@ -31,47 +52,61 @@ int main()
 
 
         }
+    }
+    srand(time(0));
+    for (int j=0;j<4;j++){
+        for (int i=0;i<4;i++){
+            if(i!=4 && j!=4)std::swap(grid[i+1][j+1], grid[1+rand()%3][1+rand()%3]);
+        }
+    }
 
     while (app.isOpen()){
-        Event e;
-        while (app.pollEvent(e)){
-            if (e.type == Event::Closed)
+        Event event;
+        while (app.pollEvent(event)){
+            if (event.type == Event::Closed)
                 app.close();
+            if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
+            app.close();
+            }
 
-            if (e.type == Event::MouseButtonPressed){
-                if (e.key.code == Mouse::Left){
+            if (event.type == Event::MouseButtonPressed){
+                if (event.key.code == Mouse::Left){
                     Vector2i pos = Mouse::getPosition(app);
                     int x = pos.x/w + 1;
                     int y = pos.y/w + 1;
 
-                    if(grid[x+1][y]==16){std::swap(grid[x][y], grid[x+1][y]);std::cout << grid[x+1][y] << '\n';}
-                    if(grid[x-1][y]==16){std::swap(grid[x][y], grid[x-1][y]);std::cout << grid[x-1][y] << '\n';}
-                    if(grid[x][y-1]==16){std::swap(grid[x][y], grid[x][y-1]);std::cout << grid[x][y-1] << '\n';}
-                    if(grid[x][y+1]==16){std::swap(grid[x][y], grid[x][y+1]);std::cout << grid[x][y+1] << '\n';}
+                    if(grid[x+1][y]==16){std::swap(grid[x][y], grid[x+1][y]);}
+                    if(grid[x-1][y]==16){std::swap(grid[x][y], grid[x-1][y]);}
+                    if(grid[x][y-1]==16){std::swap(grid[x][y], grid[x][y-1]);}
+                    if(grid[x][y+1]==16){std::swap(grid[x][y], grid[x][y+1]);}
 
                   }
                 }
               }
 //win
         day=1;
-        check=1;
+        check=0;
         for (int j=0;j<4;j++){
-          for (int i=0;i<4;i++){
-            if(grid[i+1][j+1]==day){check++;}
-            std::cout<<grid[i+1][j+1]<<" ";
-            day++;
-
-          }
+            for (int i=0;i<4;i++){
+                if(grid[i+1][j+1]==day){check++;}
+                day++;
+            }
         }
-        if(check==16){std::cout<<check;}
+        if(check==16){scene=2;}
 //
         app.clear(Color::White);
+        if(scene==1){
         for (int i=0;i<4;i++)
             for (int j=0;j<4;j++){
                 int n = grid[i+1][j+1];
                 sprite[n].setPosition(i*w,j*w);
                 app.draw(sprite[n]);
             }
+        }
+        if(scene==2){
+            app.draw(*image_index);
+            app.draw(*end_game);
+        }
         app.display();
     }
 
