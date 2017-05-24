@@ -10,13 +10,15 @@ int main(){
     RenderWindow app(VideoMode(WINDOW_W,WINDOW_H), "15-Puzzle!", sf::Style::Titlebar | sf::Style::Close);
     app.setFramerateLimit(60);
 //типо main.hpp, ибо он просто не работает
-int n=0; 
+int n=0;
 int day=1;
 int check=1;
 int scene=1;
 int pos[6][6];
 int w = 180;
 int grid[6][6] = {0};
+int a[16];
+int sum=0;
 Sprite *image_index;
 Texture *image_texture;
 Sprite sprite[17];
@@ -43,22 +45,65 @@ Text* end_game;
 
     for (int j=0;j<4;j++){
         for (int i=0;i<4;i++){
-
             n++;
             pos[i+1][j+1]=n;
             sprite[n].setTexture(t);
             sprite[n].setTextureRect( IntRect(i*w,j*w,w,w) );
             grid[i+1][j+1]=n;
-
-
         }
     }
     srand(time(0));
     for (int j=0;j<4;j++){
         for (int i=0;i<4;i++){
-            if(i!=4 && j!=4)std::swap(grid[i+1][j+1], grid[1+rand()%3][1+rand()%3]);
+            if(i!=3 && j!=3)std::swap(grid[i+1][j+1], grid[1+rand()%4][1+rand()%4]);
         }
     }
+    for (int j=0;j<4;j++){
+        for (int i=0;i<4;i++){
+          std::cout<<grid[i+1][j+1]<<"  ";
+          a[sum]=grid[i+1][j+1];
+          sum++;
+        }
+    }
+
+
+    int inv = 0;                          //проверка на решение
+    for (int i=0; i<16; ++i)
+    	if (a[i])
+    		for (int j=0; j<i; ++j)
+    			if (a[j] > a[i])
+    				++inv;
+    for (int i=0; i<16; ++i)
+    	if (a[i] == 0)
+    		inv += 1 + i / 4;
+
+    std::cout<< ((inv & 1) ? "Решения нет!" : "Решение есть!")<<std::endl;
+
+    if (inv & 1){
+      std::swap(grid[1][2], grid[2][2]);    //делаем решаемой
+      sum=0;
+      for (int j=0;j<4;j++){
+          for (int i=0;i<4;i++){
+            std::cout<<grid[i+1][j+1]<<"  ";
+            a[sum]=grid[i+1][j+1];
+            sum++;
+          }
+      }
+      std::cout<<std::endl<<"Ты не решишь это, сейчас поправим."<<std::endl;
+      inv = 0;
+      for (int i=0; i<16; ++i)
+        if (a[i])
+          for (int j=0; j<i; ++j)
+            if (a[j] > a[i])
+              ++inv;
+      for (int i=0; i<16; ++i)
+        if (a[i] == 0)
+          inv += 1 + i / 4;
+
+      std::cout<< ((inv & 1) ? "Решения нет!" : "Поправил, проверяй!")<<std::endl;
+    }
+
+
 
     while (app.isOpen()){
         Event event;
